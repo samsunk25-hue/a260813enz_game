@@ -258,7 +258,7 @@ const RAW_FOODS = [
     ],
   },
   // [복합 영양소 보스 음식]
-  // 입(아밀레이스) -> 위(펩신) -> 작은창자(쓸개즙) -> 작은창자(라이페이스)
+  // 입(아밀레이스) -> 위(펩신) -> 작은창자(트립신) -> 작은창자(쓸개즙) -> 작은창자(라이페이스)
   {
     id: 'combo_burger',
     type: 'combo',
@@ -266,39 +266,11 @@ const RAW_FOODS = [
     initialName: '햄버거 (탄+단+지)',
     isBoss: true,
     steps: [
-      {
-        organ: 'mouth',
-        targetY: TARGET_ZONES.mouth.y,
-        answer: 'amylase',
-        productEmoji: '🍔',
-        productName: '햄버거 (단+지 남음)',
-        actionLabel: '아밀레이스 콤보 1/4!',
-      },
-      {
-        organ: 'stomach',
-        targetY: TARGET_ZONES.stomach.y,
-        answer: 'pepsin',
-        productEmoji: '🍔',
-        productName: '햄버거 (지방 남음)',
-        actionLabel: '펩신 콤보 2/4!',
-      },
-      {
-        organ: 'intestine',
-        targetY: TARGET_ZONES.intestine.y,
-        answer: 'bile',
-        productEmoji: '🍔',
-        productName: '햄버거 (유화 완료)',
-        actionLabel: '쓸개즙 유화 콤보 3/4!',
-        isImmediateCombo: true,
-      },
-      {
-        organ: 'intestine',
-        targetY: TARGET_ZONES.intestine.y,
-        answer: 'lipase',
-        productEmoji: '✨💎💧',
-        productName: '완전 분해!',
-        actionLabel: '퍼펙트 소화 완료!',
-      },
+      { organ: 'mouth', targetY: TARGET_ZONES.mouth.y, answer: 'amylase', productEmoji: '🍔', productName: '햄버거 (단+지 남음)', actionLabel: '아밀레이스 콤보 1/5!' },
+      { organ: 'stomach', targetY: TARGET_ZONES.stomach.y, answer: 'pepsin', productEmoji: '🍔', productName: '햄버거 (트립신 대기)', actionLabel: '펩신 콤보 2/5!' },
+      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'trypsin', productEmoji: '🍔', productName: '햄버거 (지방 남음)', actionLabel: '트립신 콤보 3/5!' },
+      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'bile', productEmoji: '🍔', productName: '햄버거 (유화 완료)', actionLabel: '쓸개즙 유화 콤보 4/5!', isImmediateCombo: true },
+      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'lipase', productEmoji: '✨💎💧', productName: '완전 분해!', actionLabel: '퍼펙트 소화 완료!' },
     ],
   },
   {
@@ -308,9 +280,10 @@ const RAW_FOODS = [
     initialName: '피자 (탄+단+지)',
     isBoss: true,
     steps: [
-      { organ: 'mouth', targetY: TARGET_ZONES.mouth.y, answer: 'amylase', productEmoji: '🍕', productName: '피자 (단+지 남음)', actionLabel: '아밀레이스 콤보 1/4!' },
-      { organ: 'stomach', targetY: TARGET_ZONES.stomach.y, answer: 'pepsin', productEmoji: '🍕', productName: '피자 (지방 남음)', actionLabel: '펩신 콤보 2/4!' },
-      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'bile', productEmoji: '🍕', productName: '피자 (유화 완료)', actionLabel: '쓸개즙 콤보 3/4!', isImmediateCombo: true },
+      { organ: 'mouth', targetY: TARGET_ZONES.mouth.y, answer: 'amylase', productEmoji: '🍕', productName: '피자 (단+지 남음)', actionLabel: '아밀레이스 콤보 1/5!' },
+      { organ: 'stomach', targetY: TARGET_ZONES.stomach.y, answer: 'pepsin', productEmoji: '🍕', productName: '피자 (트립신 대기)', actionLabel: '펩신 콤보 2/5!' },
+      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'trypsin', productEmoji: '🍕', productName: '피자 (지방 남음)', actionLabel: '트립신 콤보 3/5!' },
+      { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'bile', productEmoji: '🍕', productName: '피자 (유화 완료)', actionLabel: '쓸개즙 콤보 4/5!', isImmediateCombo: true },
       { organ: 'intestine', targetY: TARGET_ZONES.intestine.y, answer: 'lipase', productEmoji: '✨💎💧', productName: '완전 분해!', actionLabel: '퍼펙트 소화 완료!' },
     ],
   },
