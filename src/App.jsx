@@ -5,6 +5,21 @@ import gameAudio from './gameAudio.js';
 // DATA & CONFIG (교과서 소화 과정 완벽 고증)
 // ============================================================
 
+// 비속어 필터 목록
+const PROFANITY_LIST = [
+  '시발', '씨발', '병신', '개새끼', '지랄', '존나', '좆', '창녀', '애미', '느금마',
+  '씨발년', '개새기', '시방새', '미친', '좆밥', '염병', 'fuck', 'shit', 'bitch', 'asshole'
+];
+
+export const filterProfanity = (text) => {
+  let filtered = text;
+  PROFANITY_LIST.forEach(word => {
+    const regex = new RegExp(word, 'gi');
+    filtered = filtered.replace(regex, '♥'.repeat(word.length));
+  });
+  return filtered;
+};
+
 // 소화기관 위치 및 라벨 (입 위치를 아래로 28%로 조정하여 충분한 반응 시간 확보)
 const TARGET_ZONES = {
   mouth:     { y: 28, label: '입',       color: '#f87171', emoji: '👄' },
@@ -563,7 +578,7 @@ const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickn
           type="text"
           placeholder="별명을 입력하세요 (10자 이내)"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => setNickname(filterProfanity(e.target.value))}
           maxLength={10}
           style={{
             width: '100%', padding: '12px 16px', borderRadius: 12, textAlign: 'center',
