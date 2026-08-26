@@ -996,7 +996,7 @@ export default function App() {
   const [promptMessage, setPromptMessage] = useState(null); // e.g. "⚡ 라이페이스로 분해하세요!"
 
   // Nickname & Leaderboard
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(() => localStorage.getItem('enz_game_nickname') || '');
   const [leaderboard, setLeaderboard] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -1024,6 +1024,10 @@ export default function App() {
   useEffect(() => {
     return () => gameAudio.destroy();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('enz_game_nickname', nickname);
+  }, [nickname]);
 
   // --- Refs ---
   const requestRef = useRef(null);
