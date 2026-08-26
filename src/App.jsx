@@ -539,10 +539,14 @@ const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickn
       padding: 24, textAlign: 'center',
     }}>
       {/* 로고 & 타이틀 */}
-      <div className="animate-float" style={{ marginBottom: 6 }}>
-        <span style={{ fontSize: 48 }}>🧬</span>
+      <div className="animate-float" style={{ marginBottom: 6, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <img 
+          src="./og-image.jpg" 
+          alt="소화 콤보 비트 배너" 
+          style={{ width: '100%', maxWidth: 260, borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.6)', border: '2px solid rgba(255,255,255,0.1)' }} 
+        />
       </div>
-      <h1 className="gradient-text" style={{ fontSize: 30, fontWeight: 900, marginBottom: 4, lineHeight: 1.2 }}>
+      <h1 className="gradient-text" style={{ fontSize: 30, fontWeight: 900, marginBottom: 4, marginTop: 8, lineHeight: 1.2 }}>
         소화 콤보 비트
       </h1>
       <p style={{ fontSize: 13, color: '#94a3b8', marginBottom: 18, maxWidth: 280, lineHeight: 1.5 }}>
