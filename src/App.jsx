@@ -825,7 +825,7 @@ const StageClearScreen = ({ stage, onNext }) => (
 );
 
 // 🏆 빅토리 / 게임오버 화면 (별명 입력창 없이 기존 등록된 별명으로 1-클릭 저장)
-const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, nickname, isSaved }) => (
+const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, onRestartStage, nickname, isSaved }) => (
   <div className="animate-slide-up" style={{
     position: 'absolute', inset: 0, zIndex: 60,
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -871,12 +871,23 @@ const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, nickname,
         }}>
           🏅 랭킹에 점수 등록 ({nickname || '플레이어'})
         </button>
+
+        {type === 'gameover' && stage >= 2 && (
+          <button onClick={onRestartStage} className="btn-shimmer" style={{
+            padding: '12px 20px', borderRadius: 12,
+            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+            color: 'white', fontWeight: 800, fontSize: 14,
+          }}>
+            🔄 현재 스테이지(Stage {stage}) 재도전
+          </button>
+        )}
+
         <button onClick={onRestart} style={{
           padding: '10px 20px', borderRadius: 12,
           background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
           color: '#94a3b8', fontWeight: 600, fontSize: 13,
         }}>
-          메인으로
+          🏠 메인으로 (처음부터)
         </button>
       </div>
     ) : (
@@ -889,12 +900,23 @@ const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, nickname,
         }}>
           🏆 명예의 전당 확인하기
         </button>
+
+        {type === 'gameover' && stage >= 2 && (
+          <button onClick={onRestartStage} className="btn-shimmer" style={{
+            padding: '12px 20px', borderRadius: 12,
+            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+            color: 'white', fontWeight: 800, fontSize: 14,
+          }}>
+            🔄 현재 스테이지(Stage {stage}) 재도전
+          </button>
+        )}
+
         <button onClick={onRestart} style={{
           padding: '10px 20px', borderRadius: 12,
           background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
           color: '#94a3b8', fontWeight: 600, fontSize: 13,
         }}>
-          메인으로
+          🏠 메인으로 (처음부터)
         </button>
       </div>
     )}
@@ -1200,7 +1222,11 @@ export default function App() {
     const distance = Math.abs(currentY - targetY);
 
     // 판정 범위: 히트존 중심 기준 ±11% 이내
-    if (distance > 11) return;
+    if (distance > 11) {
+      // ❌ 틀린 위치에서 눌렀을 때 점수 하강 (-20점)
+      setScore(s => Math.max(0, s - 20));
+      return;
+    }
 
     // 효소 정답 확인
     if (enzymeId === currentStep.answer) {
@@ -1302,6 +1328,7 @@ export default function App() {
       gameAudio.playMiss();
       setCombo(0);
       setPromptMessage(null);
+      setScore(s => Math.max(0, s - 50)); // 틀린 효소 선택 시 -50점 감점
 
       setHealth(h => {
         const newHealth = h - 1;
@@ -1602,6 +1629,11 @@ export default function App() {
             onSave={handleSaveScore}
             onRanking={() => setGameState('ranking')}
             onRestart={() => setGameState('start')}
+            onRestartStage={() => {
+              setHealth(3);
+              setCombo(0);
+              startStage(stage);
+            }}
           />
         )}
 
