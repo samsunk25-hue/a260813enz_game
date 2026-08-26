@@ -1,0 +1,326 @@
+@import "tailwindcss";
+
+/* ===== Design Tokens ===== */
+:root {
+  --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Dark theme palette */
+  --bg-deep: #0a0e1a;
+  --bg-card: #121829;
+  --bg-surface: #1a2035;
+  --bg-elevated: #222a42;
+  
+  --border-dim: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-active: rgba(255, 200, 50, 0.4);
+  
+  /* Accent colors */
+  --amber: #f59e0b;
+  --amber-glow: rgba(245, 158, 11, 0.3);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.3);
+  --red: #ef4444;
+  --red-glow: rgba(239, 68, 68, 0.3);
+  
+  /* Enzyme colors */
+  --enzyme-amylase: #06b6d4;
+  --enzyme-pepsin: #8b5cf6;
+  --enzyme-trypsin: #3b82f6;
+  --enzyme-bile: #f97316;
+  --enzyme-lipase: #ec4899;
+  
+  /* Organ colors */
+  --organ-mouth: #f87171;
+  --organ-stomach: #fbbf24;
+  --organ-intestine: #34d399;
+}
+
+/* ===== Base Resets ===== */
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--bg-deep);
+    color: #e2e8f0;
+    font-family: var(--font-main);
+  }
+
+  button {
+    font-family: var(--font-main);
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
+
+  input {
+    font-family: var(--font-main);
+  }
+}
+
+/* ===== Animations ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.2; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-out-up {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -80%) scale(1.4); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+@keyframes combo-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--amber-glow); }
+  50% { box-shadow: 0 0 25px var(--amber-glow), 0 0 50px var(--amber-glow); }
+}
+
+@keyframes organ-highlight {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.4); }
+}
+
+@keyframes drop-bounce {
+  0% { transform: translateY(-10px); opacity: 0; }
+  60% { transform: translateY(3px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes victory-glow {
+  0%, 100% { 
+    text-shadow: 0 0 10px rgba(250, 204, 21, 0.5), 0 0 30px rgba(250, 204, 21, 0.3);
+  }
+  50% { 
+    text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 0 60px rgba(250, 204, 21, 0.5), 0 0 100px rgba(250, 204, 21, 0.3);
+  }
+}
+
+@keyframes absorb {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; transform: translateY(-120px) scale(1.2); }
+  100% { transform: translateY(-150px) scale(0); opacity: 0; }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
+.animate-pop-in { animation: pop-in 0.4s ease-out forwards; }
+.animate-fade-out-up { animation: fade-out-up 0.6s ease-out forwards; }
+.animate-shake { animation: shake 0.4s ease-in-out; }
+.animate-combo-pop { animation: combo-pop 0.3s ease-out; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+.animate-organ-highlight { animation: organ-highlight 1s ease-in-out infinite; }
+.animate-drop-bounce { animation: drop-bounce 0.4s ease-out; }
+.animate-victory-glow { animation: victory-glow 2s ease-in-out infinite; }
+.animate-absorb { animation: absorb 1.5s ease-in-out infinite; opacity: 0; }
+
+/* ===== Component Styles ===== */
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(18, 24, 41, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shimmer button */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Enzyme button base */
+.enzyme-btn {
+  position: relative;
+  padding: 14px 8px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  transition: transform 0.1s, box-shadow 0.2s, filter 0.2s;
+  border-bottom: 4px solid rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  letter-spacing: -0.02em;
+}
+
+.enzyme-btn:active:not(:disabled) {
+  transform: translateY(3px) scale(0.95);
+  border-bottom-width: 1px;
+  filter: brightness(1.1);
+}
+
+.enzyme-btn:disabled {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+.enzyme-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Keyboard hint */
+.key-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 10px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--emerald), #22d3ee);
+  transition: width 0.4s ease-out;
+}
+
+/* Score display */
+.score-display {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+/* Food item */
+.food-item {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.1);
+  transition: box-shadow 0.2s;
+}
+
+/* Hit zone ring */
+.hit-zone {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.15);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.hit-zone.active {
+  border-color: var(--amber);
+  box-shadow: 0 0 20px var(--amber-glow), inset 0 0 20px var(--amber-glow);
+}
+
+.hit-zone.active .hit-zone-inner {
+  animation: pulse-ring 1s ease-in-out infinite;
+}
+
+.hit-zone-inner {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.1);
+}
+
+/* Organ label */
+.organ-label {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+}
