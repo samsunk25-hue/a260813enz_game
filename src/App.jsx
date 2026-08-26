@@ -1239,8 +1239,18 @@ export default function App() {
 
     // 판정 범위: 히트존 중심 기준 ±11% 이내
     if (distance > 11) {
-      // ❌ 틀린 위치에서 눌렀을 때 점수 하강 (-20점)
+      // ❌ 틀린 위치에서 눌렀을 때 점수 하강 (-20점) 및 X 표시
       setScore(s => Math.max(0, s - 20));
+      setCombo(0);
+      gameAudio.playMiss();
+      setFeedback({ type: 'miss', y: currentY });
+      cancelAnimationFrame(requestRef.current);
+      setTimeout(() => {
+        if (gameStateRef.current === 'playing') {
+          setFeedback(null);
+          requestRef.current = requestAnimationFrame(updateLoop);
+        }
+      }, 300);
       return;
     }
 
