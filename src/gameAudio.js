@@ -5,7 +5,7 @@
 // 화음 및 음계 주파수 테이블 (C Major / Pentatonic + Chords)
 const PENTATONIC = [261.63, 293.66, 329.63, 392.00, 440.00]; // C4 D4 E4 G4 A4
 const PENTATONIC_HIGH = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // C5~C6
-const BASS_NOTES = [130.81, 146.83, 164.81, 174.61, 196.00, 220.00]; // C3~A3
+const PENTATONIC_LOW = [130.81, 146.83, 164.81, 174.61, 196.00, 220.00]; // C3~A3
 
 class GameAudio {
   constructor() {
