@@ -1592,8 +1592,8 @@ export default function App() {
         {/* 콤보 게이지 */}
         {gameState === 'playing' && <ComboGauge combo={combo} />}
 
-        {/* NEXT 미리보기 (다음 음식은 언제나 처음 음식 형태) */}
-        {gameState === 'playing' && <NextPreview item={nextItem} />}
+        {/* NEXT 미리보기 (마지막 음식일 때는 다음 음식을 숨김) */}
+        {gameState === 'playing' && clearedCount < (stageConfig?.targetCount - 1) && <NextPreview item={nextItem} />}
 
         {/* 1초 대기 알림 */}
         {gameState === 'playing' && isWaiting && (
