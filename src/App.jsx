@@ -801,7 +801,7 @@ const AbsorptionScreen = ({ onComplete }) => {
         
         {/* 모세혈관 (수용성 영양소) */}
         <div style={{ position: 'relative', width: 70, height: '100%', background: 'rgba(239, 68, 68, 0.2)', border: '4px solid #ef4444', borderRadius: '35px 35px 0 0' }}>
-          <div style={{ position: 'absolute', bottom: -30, width: '100%', textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#fca5a5' }}>모세혈관<br/>(포도당/아미노산)</div>
+          <div style={{ position: 'absolute', top: '100%', marginTop: 8, left: '50%', transform: 'translateX(-50%)', width: 120, textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#fca5a5', lineHeight: 1.3 }}>모세혈관<br/>(포도당/아미노산)</div>
           
           <div className="animate-absorb" style={{ position: 'absolute', bottom: 20, left: 15, fontSize: 24, animationDelay: '0s' }}>✨</div>
           <div className="animate-absorb" style={{ position: 'absolute', bottom: 10, left: 35, fontSize: 24, animationDelay: '0.4s' }}>💎</div>
@@ -810,7 +810,7 @@ const AbsorptionScreen = ({ onComplete }) => {
 
         {/* 암죽관 (지용성 영양소) */}
         <div style={{ position: 'relative', width: 70, height: '100%', background: 'rgba(250, 204, 21, 0.2)', border: '4px solid #facc15', borderRadius: '35px 35px 0 0' }}>
-          <div style={{ position: 'absolute', bottom: -30, width: '100%', textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#fde047' }}>암죽관<br/>(지방산+글리세리드)</div>
+          <div style={{ position: 'absolute', top: '100%', marginTop: 8, left: '50%', transform: 'translateX(-50%)', width: 120, textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#fde047', lineHeight: 1.3 }}>암죽관<br/>(지방산+글리세리드)</div>
           
           <div className="animate-absorb" style={{ position: 'absolute', bottom: 15, left: 20, fontSize: 28, animationDelay: '0.2s' }}>💧</div>
           <div className="animate-absorb" style={{ position: 'absolute', bottom: 25, left: 35, fontSize: 28, animationDelay: '0.6s' }}>💧</div>
