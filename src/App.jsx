@@ -328,10 +328,6 @@ const createFoodInstance = (currentStage) => {
     if (Math.random() < 0.25) {
       pool = RAW_FOODS.filter(f => f.isBoss);
     }
-  } else if (currentStage === 2) {
-    if (Math.random() < 0.1) {
-      pool = RAW_FOODS.filter(f => f.isBoss);
-    }
   }
   
   const template = pool[Math.floor(Math.random() * pool.length)];
@@ -719,6 +715,18 @@ const GuideScreen = ({ onClose, onStart }) => (
           </p>
         </div>
 
+        {/* 특수 아이템 */}
+        <div className="glass-card" style={{ padding: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 20 }}>🎁</span>
+            <span style={{ fontWeight: 800, color: '#facc15', fontSize: 13 }}>특수 아이템</span>
+          </div>
+          <p style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.6, margin: 0 }}>
+            • <strong>🥬 식이섬유 (단축키 Q)</strong>: 1~3단계를 완벽(하트 3개)하게 깨면 획득! 4단계부터 사용 시 3.5초간 음식 하강 속도를 늦춰줍니다.<br />
+            • <strong>💊 소화제 (단축키 W)</strong>: 5단계 시작 시 1개 지급! 사용 시 화면 내 음식을 조건 없이 즉시 퍼펙트 소화시킵니다.
+          </p>
+        </div>
+
         {/* 조작법 */}
         <div className="glass-card" style={{ padding: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -726,8 +734,9 @@ const GuideScreen = ({ onClose, onStart }) => (
             <span style={{ fontWeight: 800, color: '#e2e8f0', fontSize: 13 }}>키보드 & 터치 조작</span>
           </div>
           <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.7, margin: 0 }}>
-            키보드: <strong>A</strong>(아밀레이스), <strong>S</strong>(펩신), <strong>D</strong>(트립신), <strong>F</strong>(쓸개즙), <strong>G</strong>(라이페이스)<br />
-            모바일: 하단 버튼 직접 터치
+            키보드 효소: <strong>A</strong>(아밀레이스), <strong>S</strong>(펩신), <strong>D</strong>(트립신), <strong>F</strong>(쓸개즙), <strong>G</strong>(라이페이스)<br />
+            키보드 아이템: <strong>Q</strong>(식이섬유), <strong>W</strong>(소화제)<br />
+            모바일: 하단 버튼 및 상단 아이템 직접 터치
           </p>
         </div>
       </div>
@@ -1000,6 +1009,11 @@ export default function App() {
   const [isSaved, setIsSaved] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
+  // Inventory & Effects
+  const [fiberCount, setFiberCount] = useState(0);
+  const [medicineCount, setMedicineCount] = useState(0);
+  const [isFiberActive, setIsFiberActive] = useState(false);
+
   // --- Audio Handlers ---
   const initAudio = useCallback(() => {
     gameAudio.init();
@@ -1029,6 +1043,8 @@ export default function App() {
   const feedbackRef = useRef(feedback);
   const stageRef = useRef(stage);
   const nextItemRef = useRef(null);
+  const isFiberActiveRef = useRef(isFiberActive);
+  const healthRef = useRef(health);
 
   // Sync refs
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
@@ -1037,6 +1053,8 @@ export default function App() {
   useEffect(() => { isWaitingRef.current = isWaiting; }, [isWaiting]);
   useEffect(() => { feedbackRef.current = feedback; }, [feedback]);
   useEffect(() => { stageRef.current = stage; }, [stage]);
+  useEffect(() => { isFiberActiveRef.current = isFiberActive; }, [isFiberActive]);
+  useEffect(() => { healthRef.current = health; }, [health]);
 
   // --- Leaderboard & Progress Management ---
   useEffect(() => {
@@ -1113,6 +1131,11 @@ export default function App() {
     setIsSaved(false);
     setPromptMessage(null);
 
+    // 5단계 시작 시 소화제 지급
+    if (targetStage === 5) {
+      setMedicineCount(1);
+    }
+
     const initialActive = createFoodInstance(targetStage);
     const initialNext = createFoodInstance(targetStage);
     setActiveItem(initialActive);
@@ -1164,7 +1187,8 @@ export default function App() {
     }
     if (feedbackRef.current) return;
 
-    const currentSpeed = STAGE_CONFIGS[stageRef.current].speed;
+    const baseSpeed = STAGE_CONFIGS[stageRef.current].speed;
+    const currentSpeed = isFiberActiveRef.current ? baseSpeed * 0.4 : baseSpeed;
     const currentItem = activeItemRef.current;
     const currentStep = currentItem.steps[currentItem.stepIndex];
 
@@ -1313,6 +1337,12 @@ export default function App() {
             setTimeout(() => {
               gameAudio.stopBGM();
               gameAudio.playStageClear(); // 🎵 융털 흡수 연출 시 효과음 재생
+              
+              // [보너스 지급 로직] 1~3단계 퍼펙트 클리어 시 식이섬유 획득
+              if (stageRef.current <= 3 && healthRef.current === 3) {
+                setFiberCount(f => Math.min(3, f + 1));
+              }
+
               setGameState('absorption');
             }, 600);
           } else {
@@ -1346,6 +1376,62 @@ export default function App() {
     }
   }, [combo, queueNextItem, updateLoop]);
 
+  // --- Item Handlers ---
+  const useFiber = useCallback(() => {
+    if (gameStateRef.current !== 'playing') return;
+    if (stageRef.current < 4) return;
+    if (fiberCount <= 0) return;
+    if (isFiberActiveRef.current) return;
+
+    setFiberCount(c => c - 1);
+    setIsFiberActive(true);
+    // 3.5초 후 효과 종료
+    setTimeout(() => {
+      setIsFiberActive(false);
+    }, 3500);
+  }, [fiberCount]);
+
+  const useMedicine = useCallback(() => {
+    if (gameStateRef.current !== 'playing') return;
+    if (stageRef.current !== 5) return;
+    if (medicineCount <= 0) return;
+    const item = activeItemRef.current;
+    if (!item) return;
+
+    setMedicineCount(c => c - 1);
+    gameAudio.playHit();
+    cancelAnimationFrame(requestRef.current);
+    
+    setFeedback({
+      type: 'hit',
+      y: dropYRef.current,
+      label: '💊 소화제 쾌속 소화!',
+      productEmoji: '✨',
+    });
+    setPromptMessage(null);
+    setScore(s => s + 300);
+    setCombo(c => {
+      const newCombo = c + 1;
+      setMaxCombo(m => Math.max(m, newCombo));
+      if (newCombo >= 3) gameAudio.playCombo(newCombo);
+      return newCombo;
+    });
+
+    setClearedCount(prev => {
+      const newCleared = prev + 1;
+      if (newCleared >= STAGE_CONFIGS[stageRef.current].targetCount) {
+        setTimeout(() => {
+          gameAudio.stopBGM();
+          gameAudio.playStageClear();
+          setGameState('absorption');
+        }, 600);
+      } else {
+        setTimeout(() => queueNextItem(), 500);
+      }
+      return newCleared;
+    });
+  }, [medicineCount, queueNextItem]);
+
   // --- Keyboard Event Handler ---
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1355,6 +1441,16 @@ export default function App() {
         toggleSound();
         return;
       }
+      if (key === 'q') {
+        e.preventDefault();
+        useFiber();
+        return;
+      }
+      if (key === 'w') {
+        e.preventDefault();
+        useMedicine();
+        return;
+      }
       if (KEYBOARD_MAP[key]) {
         e.preventDefault();
         handleHit(KEYBOARD_MAP[key]);
@@ -1362,7 +1458,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleHit, toggleSound]);
+  }, [handleHit, toggleSound, useFiber, useMedicine]);
 
   // --- Score Save Handler (별명 입력창 없이 1-클릭) ---
   const handleSaveScore = useCallback(() => {
@@ -1468,19 +1564,21 @@ export default function App() {
 
       {/* === 게임 필드 === */}
       <div
-        className={feedback?.type === 'miss' ? 'animate-shake' : ''}
+        className={`${feedback?.type === 'miss' ? 'animate-shake' : ''} ${isFiberActive ? 'animate-fiber-glow' : ''}`}
         style={{
           width: '100%', maxWidth: 420,
           height: '62vh', minHeight: 410,
           background: feedback?.type === 'miss'
             ? 'linear-gradient(180deg, rgba(239,68,68,0.1) 0%, var(--bg-card) 30%)'
-            : 'var(--bg-card)',
+            : isFiberActive 
+              ? 'linear-gradient(180deg, rgba(52,211,153,0.15) 0%, var(--bg-card) 30%)'
+              : 'var(--bg-card)',
           borderRadius: 20,
-          border: `2px solid ${feedback?.type === 'miss' ? 'rgba(239,68,68,0.5)' : 'var(--border-subtle)'}`,
+          border: `2px solid ${feedback?.type === 'miss' ? 'rgba(239,68,68,0.5)' : isFiberActive ? 'rgba(52,211,153,0.6)' : 'var(--border-subtle)'}`,
           position: 'relative',
           overflow: 'hidden',
           transition: 'border-color 0.3s, background 0.3s',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.4)',
+          boxShadow: isFiberActive ? '0 0 30px rgba(52,211,153,0.3)' : '0 10px 40px rgba(0,0,0,0.4)',
         }}
       >
         {/* 배경 소화기관 모식도 (입 28%, 위 53%, 소장 78% 정밀 정렬) */}
@@ -1644,6 +1742,51 @@ export default function App() {
           />
         )}
       </div>
+
+      {/* === 아이템 (태블릿/PC) 버튼 === */}
+      {(stage >= 4) && (
+        <div style={{
+          width: '100%', maxWidth: 420,
+          marginTop: 8, display: 'flex', gap: 10, justifyContent: 'center'
+        }}>
+          {stage >= 4 && (
+            <button
+              onClick={useFiber}
+              disabled={fiberCount <= 0 || isFiberActive || gameState !== 'playing'}
+              style={{
+                flex: 1, padding: '8px 12px', borderRadius: 12,
+                background: fiberCount > 0 && !isFiberActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.05)',
+                color: fiberCount > 0 && !isFiberActive ? 'white' : '#64748b',
+                border: '1px solid rgba(255,255,255,0.1)',
+                fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                opacity: (gameState !== 'playing' || isFiberActive) ? 0.5 : 1,
+              }}
+            >
+              🥬 식이섬유 <span style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 8 }}>{fiberCount}</span> 
+              <span style={{ fontSize: 10, opacity: 0.7 }}>(Q)</span>
+            </button>
+          )}
+          {stage >= 5 && (
+            <button
+              onClick={useMedicine}
+              disabled={medicineCount <= 0 || gameState !== 'playing'}
+              style={{
+                flex: 1, padding: '8px 12px', borderRadius: 12,
+                background: medicineCount > 0 ? 'linear-gradient(135deg, #f43f5e, #e11d48)' : 'rgba(255,255,255,0.05)',
+                color: medicineCount > 0 ? 'white' : '#64748b',
+                border: '1px solid rgba(255,255,255,0.1)',
+                fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                opacity: gameState !== 'playing' ? 0.5 : 1,
+              }}
+            >
+              💊 소화제 <span style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 8 }}>{medicineCount}</span>
+              <span style={{ fontSize: 10, opacity: 0.7 }}>(W)</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* === 효소 조작 아케이드 버튼 === */}
       <div style={{
