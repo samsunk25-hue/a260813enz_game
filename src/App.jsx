@@ -1525,7 +1525,7 @@ export default function App() {
     }}>
       {/* === HUD (상단 인터페이스 & 음소거 버튼) === */}
       <div style={{
-        width: '100%', maxWidth: 420,
+        width: '100%', maxWidth: 560,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '6px 4px', marginBottom: 6,
       }}>
@@ -1588,7 +1588,7 @@ export default function App() {
       <div
         className={`${feedback?.type === 'miss' ? 'animate-shake' : ''} ${isFiberActive ? 'animate-fiber-glow' : ''}`}
         style={{
-          width: '100%', maxWidth: 420,
+          width: '100%', maxWidth: 560,
           height: '62vh', minHeight: 410,
           background: feedback?.type === 'miss'
             ? 'linear-gradient(180deg, rgba(239,68,68,0.1) 0%, var(--bg-card) 30%)'
@@ -1769,7 +1769,7 @@ export default function App() {
       {/* === 아이템 (태블릿/PC) 버튼 === */}
       {(stage >= 4) && (
         <div style={{
-          width: '100%', maxWidth: 420,
+          width: '100%', maxWidth: 560,
           marginTop: 8, display: 'flex', gap: 10, justifyContent: 'center'
         }}>
           {stage >= 4 && (
@@ -1813,7 +1813,7 @@ export default function App() {
 
       {/* === 효소 조작 아케이드 버튼 === */}
       <div style={{
-        width: '100%', maxWidth: 420,
+        width: '100%', maxWidth: 560,
         marginTop: 10,
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
@@ -1839,7 +1839,7 @@ export default function App() {
       {/* 콤보 & 키보드 안내 바 */}
       {gameState === 'playing' && (
         <div style={{
-          width: '100%', maxWidth: 420, marginTop: 6,
+          width: '100%', maxWidth: 560, marginTop: 6,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           padding: '0 4px',
         }}>
