@@ -794,7 +794,7 @@ const AbsorptionScreen = ({ onComplete }) => {
 };
 
 // 🎉 스테이지 클리어 모달
-const StageClearScreen = ({ stage, onNext }) => (
+const StageClearScreen = ({ stage, onNext, onStop }) => (
   <div className="animate-slide-up" style={{
     position: 'absolute', inset: 0, zIndex: 60,
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -810,18 +810,31 @@ const StageClearScreen = ({ stage, onNext }) => (
     <p style={{ fontSize: 13, color: '#94a3b8', marginBottom: 24 }}>
       다음 단계의 소화 효소 도전에 나섭니다
     </p>
-    <button
-      onClick={onNext}
-      className="btn-shimmer"
-      style={{
-        padding: '13px 28px', borderRadius: 14,
-        background: 'linear-gradient(135deg, #10b981, #059669)',
-        color: 'white', fontWeight: 800, fontSize: 15,
-        boxShadow: '0 4px 20px rgba(16,185,129,0.35)',
-      }}
-    >
-      {stage + 1}단계 도전하기 →
-    </button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+      <button
+        onClick={onNext}
+        className="btn-shimmer"
+        style={{
+          padding: '13px 28px', borderRadius: 14,
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          color: 'white', fontWeight: 800, fontSize: 15,
+          boxShadow: '0 4px 20px rgba(16,185,129,0.35)',
+        }}
+      >
+        {stage + 1}단계 도전하기 →
+      </button>
+
+      <button
+        onClick={onStop}
+        style={{
+          padding: '10px 20px', borderRadius: 12,
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+          color: '#cbd5e1', fontWeight: 700, fontSize: 13,
+        }}
+      >
+        🛑 그만하고 명예의 전당에 등록
+      </button>
+    </div>
   </div>
 );
 
@@ -834,21 +847,24 @@ const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, onRestart
     padding: 24, textAlign: 'center',
   }}>
     <div className="animate-pop-in">
-      <span style={{ fontSize: 52 }}>{type === 'victory' ? '🏆' : '💔'}</span>
+      <span style={{ fontSize: 52 }}>{type === 'victory' ? '🏆' : type === 'stop' ? '✋' : '💔'}</span>
     </div>
     <h1
       className={type === 'victory' ? 'animate-victory-glow' : ''}
       style={{
         fontSize: type === 'victory' ? 32 : 26,
         fontWeight: 900,
-        color: type === 'victory' ? '#facc15' : '#ef4444',
+        color: type === 'victory' ? '#facc15' : type === 'stop' ? '#60a5fa' : '#ef4444',
         marginTop: 10, marginBottom: 4,
       }}
     >
-      {type === 'victory' ? 'VICTORY!' : 'GAME OVER'}
+      {type === 'victory' ? 'VICTORY!' : type === 'stop' ? 'WELL DONE!' : 'GAME OVER'}
     </h1>
     {type === 'victory' && (
       <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 4 }}>모든 5단계를 완벽하게 클리어했습니다!</p>
+    )}
+    {type === 'stop' && (
+      <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 4 }}>훌륭합니다! 도전을 멈추고 기록을 남깁니다.</p>
     )}
     
     <div style={{
@@ -1720,10 +1736,11 @@ export default function App() {
           <StageClearScreen
             stage={stage}
             onNext={() => startStage(stage + 1)}
+            onStop={() => setGameState('stop')}
           />
         )}
 
-        {(gameState === 'victory' || gameState === 'gameover') && (
+        {(gameState === 'victory' || gameState === 'gameover' || gameState === 'stop') && (
           <EndScreen
             type={gameState}
             score={score}
