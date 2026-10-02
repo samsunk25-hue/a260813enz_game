@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// 소화 콤보 비트 - 온라인 명예의 전당 보안 규칙
+// players/{별명}: { nickname, totalScore, plays, updatedAt }
+// - 누구나 랭킹 읽기 가능
+// - 점수는 더하기만 가능 (한 번에 0~100,000점, 플레이 횟수 +1), 삭제/감소 불가
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /players/{playerId} {
+      allow read: if true;
+
+      allow create: if request.resource.data.keys().hasOnly(['nickname', 'totalScore', 'plays', 'updatedAt'])
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0
+        && request.resource.data.nickname.size() <= 10
+        && request.resource.data.totalScore is int
+        && request.resource.data.totalScore >= 0
+        && request.resource.data.totalScore <= 100000
+        && request.resource.data.plays == 1;
+
+      allow update: if request.resource.data.keys().hasOnly(['nickname', 'totalScore', 'plays', 'updatedAt'])
+        && request.resource.data.nickname == resource.data.nickname
+        && request.resource.data.totalScore is int
+        && request.resource.data.totalScore >= resource.data.totalScore
+        && request.resource.data.totalScore - resource.data.totalScore <= 100000
+        && request.resource.data.plays == resource.data.plays + 1;
+
+      allow delete: if false;
+    }
+  }
+}

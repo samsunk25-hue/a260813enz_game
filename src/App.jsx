@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import gameAudio from './gameAudio.js';
+import { loadLocalRecords, recordScore, aggregateTop, subscribeOnlineTop, isOnlineRanking, TOP_N } from './leaderboard.js';
 
 // ============================================================
 // DATA & CONFIG (교과서 소화 과정 완벽 고증)
@@ -642,7 +643,7 @@ const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickn
         </button>
       </div>
 
-      {/* 🏆 명예의 전당 미리보기 (TOP 3) */}
+      {/* 🏆 명예의 전당 (누적 점수 TOP 5) */}
       <div
         onClick={onRanking}
         className="glass-card"
@@ -652,23 +653,23 @@ const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickn
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 900, color: '#facc15' }}>🏆 명예의 전당</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>전체 보기 →</span>
+          <span style={{ fontSize: 13, fontWeight: 900, color: '#facc15' }}>🏆 명예의 전당 <span style={{ fontSize: 10, color: '#94a3b8' }}>누적 TOP 5</span></span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>크게 보기 →</span>
         </div>
         {leaderboard.length === 0 ? (
           <div style={{ fontSize: 12, color: '#64748b', padding: '4px 0' }}>아직 등록된 기록이 없습니다. 첫 번째 주인공이 되어 보세요!</div>
         ) : (
-          leaderboard.slice(0, 3).map((item, idx) => (
+          leaderboard.map((item, idx) => (
             <div key={idx} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '4px 2px', fontSize: 13, fontWeight: 800,
               borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
             }}>
-              <span style={{ color: idx === 0 ? '#facc15' : idx === 1 ? '#cbd5e1' : '#c2855a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {['🥇', '🥈', '🥉'][idx]} {item.nickname}
+              <span style={{ color: idx === 0 ? '#facc15' : idx === 1 ? '#cbd5e1' : idx === 2 ? '#c2855a' : '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {['🥇', '🥈', '🥉'][idx] || `${idx + 1}.`} {item.nickname}
               </span>
               <span style={{ color: 'white', fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: 8 }}>
-                {item.score?.toLocaleString()}점 <span style={{ fontSize: 10, color: '#94a3b8' }}>(S{item.stage})</span>
+                {item.totalScore.toLocaleString()}점 <span style={{ fontSize: 10, color: '#94a3b8' }}>({item.plays}회)</span>
               </span>
             </div>
           ))
@@ -1012,14 +1013,17 @@ const PauseScreen = ({ onResume, onHome }) => (
 const RankingScreen = ({ leaderboard, onClose }) => (
   <div className="animate-slide-up" style={{
     position: 'absolute', inset: 0, zIndex: 60,
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
     background: 'var(--bg-deep)',
-    padding: 24, textAlign: 'center',
+    padding: '20px 24px', textAlign: 'center',
   }}>
-    <span style={{ fontSize: 36, marginBottom: 6 }}>🏆</span>
-    <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 18, color: '#facc15' }}>소화 콤보 왕 TOP 5</h2>
+    <span style={{ fontSize: 36, marginBottom: 4 }}>🏆</span>
+    <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 4, color: '#facc15' }}>명예의 전당</h2>
+    <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 14 }}>
+      누적 점수 TOP {TOP_N} · {isOnlineRanking ? '🌐 전체 태블릿 공유' : '📱 이 기기 기록'}
+    </p>
 
-    <div style={{ width: '100%', maxWidth: 300, display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+    <div style={{ width: '100%', maxWidth: 360, flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16, paddingRight: 2 }}>
       {leaderboard.length === 0 ? (
         <p style={{ fontSize: 13, color: '#64748b' }}>등록된 기록이 없습니다.</p>
       ) : (
@@ -1028,6 +1032,7 @@ const RankingScreen = ({ leaderboard, onClose }) => (
             key={idx}
             className="glass-card"
             style={{
+              flexShrink: 0,
               padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               border: idx === 0 ? '1px solid rgba(245,158,11,0.4)' : undefined,
             }}
@@ -1039,7 +1044,7 @@ const RankingScreen = ({ leaderboard, onClose }) => (
               {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`} {item.nickname}
             </span>
             <span style={{ fontWeight: 800, fontSize: 13, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
-              {item.score?.toLocaleString()}점 <span style={{ fontSize: 10, color: '#94a3b8' }}>(S{item.stage})</span>
+              {item.totalScore.toLocaleString()}점 <span style={{ fontSize: 10, color: '#94a3b8' }}>({item.plays}회 플레이)</span>
             </span>
           </div>
         ))
@@ -1081,7 +1086,10 @@ export default function App() {
 
   // Nickname & Leaderboard
   const [nickname, setNickname] = useState(() => localStorage.getItem('enz_game_nickname') || '');
-  const [leaderboard, setLeaderboard] = useState([]);
+  // 명예의 전당: 학생별 누적 점수 상위 5명 (온라인 설정 시 전체 태블릿 공유)
+  const [localRecords, setLocalRecords] = useState(loadLocalRecords);
+  const [onlineTop, setOnlineTop] = useState(null);
+  const leaderboard = useMemo(() => onlineTop ?? aggregateTop(localRecords), [onlineTop, localRecords]);
   const [isSaved, setIsSaved] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -1142,11 +1150,14 @@ export default function App() {
   useEffect(() => { healthRef.current = health; }, [health]);
 
   // --- Leaderboard & Progress Management ---
+  // 브라우저가 저장 공간을 임의로 정리하지 않도록 영구 저장 요청
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('digestion_beat_leaderboard');
-      if (saved) setLeaderboard(JSON.parse(saved));
-    } catch { /* ignore */ }
+    try { navigator.storage?.persist?.(); } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (!isOnlineRanking) return undefined;
+    return subscribeOnlineTop(setOnlineTop, (e) => console.warn('온라인 랭킹 불러오기 실패:', e));
   }, []);
 
   const saveToLeaderboard = useCallback((name, finalScore, finalStage, finalMaxCombo) => {
@@ -1157,11 +1168,7 @@ export default function App() {
       maxCombo: finalMaxCombo,
       date: new Date().toLocaleDateString(),
     };
-    setLeaderboard(prev => {
-      const updated = [...prev, newEntry].sort((a, b) => b.score - a.score).slice(0, 5);
-      try { localStorage.setItem('digestion_beat_leaderboard', JSON.stringify(updated)); } catch { /* */ }
-      return updated;
-    });
+    setLocalRecords(recordScore(newEntry));
   }, []);
 
   const SAVE_KEY_PREFIX = 'dcb_progress_';
