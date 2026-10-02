@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import gameAudio from './gameAudio.js';
-import { loadLocalRecords, recordScore, aggregateTop, subscribeOnlineTop, isOnlineRanking, TOP_N } from './leaderboard.js';
+import { loadLocalRecords, recordScore, aggregateTop, subscribeOnlineTop, migrateLocalToOnline, isOnlineRanking, TOP_N } from './leaderboard.js';
 
 // ============================================================
 // DATA & CONFIG (교과서 소화 과정 완벽 고증)
@@ -1157,6 +1157,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isOnlineRanking) return undefined;
+    migrateLocalToOnline();
     return subscribeOnlineTop(setOnlineTop, (e) => console.warn('온라인 랭킹 불러오기 실패:', e));
   }, []);
 

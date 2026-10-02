@@ -7,12 +7,12 @@
 //  접근 제한은 firestore.rules 로 합니다.)
 // ============================================================
 const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: 'AIzaSyDCdmhcg3GYTjYMZzbpBG8RY7uOwPXlqbs',
+  authDomain: 'enz-combo-beat.firebaseapp.com',
+  projectId: 'enz-combo-beat',
+  storageBucket: 'enz-combo-beat.firebasestorage.app',
+  messagingSenderId: '569479122524',
+  appId: '1:569479122524:web:37de11b2dceef3530a2099',
 };
 
 export default firebaseConfig;

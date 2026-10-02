@@ -68,24 +68,43 @@ const getDb = () => {
 // 별명을 문서 ID로 안전하게 변환 ('/' 등 금지 문자 처리)
 const playerDocId = (name) => encodeURIComponent(name.trim()).replace(/\./g, '%2E');
 
+// 온라인 학생 누적 점수에 한 판의 점수를 더함
+const addOnline = async (entry) => {
+  const { db, fs } = await getDb();
+  const nickname = (entry.nickname || '익명').trim().slice(0, 10) || '익명';
+  const ref = fs.doc(db, 'players', playerDocId(nickname));
+  return fs.setDoc(ref, {
+    nickname,
+    totalScore: fs.increment(Math.max(0, Math.round(Number(entry.score) || 0))),
+    plays: fs.increment(1),
+    updatedAt: fs.serverTimestamp(),
+  }, { merge: true });
+};
+
 // 점수 기록: 로컬에 항상 저장 + 온라인이면 학생 누적 점수에 더함
 export const recordScore = (entry) => {
   const records = [...loadLocalRecords(), entry];
   saveLocalRecords(records);
 
-  const dbP = getDb();
-  if (dbP) {
-    dbP.then(({ db, fs }) => {
-      const ref = fs.doc(db, 'players', playerDocId(entry.nickname));
-      return fs.setDoc(ref, {
-        nickname: entry.nickname,
-        totalScore: fs.increment(entry.score),
-        plays: fs.increment(1),
-        updatedAt: fs.serverTimestamp(),
-      }, { merge: true });
-    }).catch(e => console.warn('온라인 랭킹 저장 실패 (로컬에는 저장됨):', e));
+  if (isOnlineRanking) {
+    addOnline(entry).catch(e => console.warn('온라인 랭킹 저장 실패 (로컬에는 저장됨):', e));
   }
   return records;
+};
+
+// 온라인 랭킹 도입 전에 이 기기에 저장된 기록을 한 번만 온라인으로 올림
+const MIGRATED_KEY = 'dcb_online_migrated';
+export const migrateLocalToOnline = async () => {
+  if (!isOnlineRanking) return;
+  try { if (localStorage.getItem(MIGRATED_KEY)) return; } catch { return; }
+  const records = loadLocalRecords();
+  try {
+    localStorage.setItem(MIGRATED_KEY, new Date().toISOString());
+    // 같은 학생 문서에 동시에 쓰면 충돌하므로 순서대로 전송
+    for (const r of records) await addOnline(r);
+  } catch (e) {
+    console.warn('기존 기록 온라인 업로드 실패:', e);
+  }
 };
 
 // 온라인 상위 N명 실시간 구독. 반환값: 구독 해제 함수
