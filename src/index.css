@@ -33,6 +33,9 @@
   --organ-mouth: #f87171;
   --organ-stomach: #fbbf24;
   --organ-intestine: #34d399;
+
+  /* Layout */
+  --game-max-width: 560px;
 }
 
 /* ===== Base Resets ===== */
@@ -165,6 +168,14 @@
 .animate-organ-highlight { animation: organ-highlight 1s ease-in-out infinite; }
 .animate-drop-bounce { animation: drop-bounce 0.4s ease-out; }
 .animate-victory-glow { animation: victory-glow 2s ease-in-out infinite; }
+@keyframes milestone {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  25% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -60%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+}
+.animate-milestone { animation: milestone 1.8s ease-out forwards; }
 .animate-absorb { animation: absorb 1.5s ease-in-out infinite; opacity: 0; }
 
 /* ===== Component Styles ===== */
@@ -312,20 +323,101 @@
   border: 2px dashed rgba(255,255,255,0.1);
 }
 
-/* Organ label */
+/* Organ label (히트존 옆 목표 기관 표시) */
 .organ-label {
   position: absolute;
-  left: -4px;
+  left: -8px;
   top: 50%;
   transform: translate(-100%, -50%);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 900;
   white-space: nowrap;
+  color: #0f172a;
   background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid var(--border-subtle);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+}
+
+/* Organ tag (배경 모식도 위 기관 이름표) */
+.organ-tag {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #0f172a;
+  border: 2px solid rgba(255,255,255,0.55);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+  opacity: 0.9;
+  pointer-events: none;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.organ-tag.minor {
+  font-size: 13px;
+  padding: 3px 9px;
+  opacity: 0.75;
+}
+.organ-tag.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.12);
+  box-shadow: 0 0 18px var(--tag-color), 0 2px 10px rgba(0,0,0,0.45);
+}
+
+/* ===== Game Layout (폰 / 태블릿 반응형) ===== */
+.game-shell {
+  width: 100%;
+  max-width: var(--game-max-width);
+}
+
+.game-field {
+  height: 62vh;
+  height: 62dvh;
+  min-height: 410px;
+}
+
+.hud-score { font-size: 24px; }
+.hud-stage { font-size: 10px; }
+.food-name { font-size: 10px; }
+.enzyme-name { display: block; font-size: 11px; font-weight: 800; line-height: 1.2; }
+
+button {
+  touch-action: manipulation;
+}
+
+/* 태블릿 (세로/가로) */
+@media (min-width: 700px) {
+  :root { --game-max-width: 760px; }
+
+  .game-field {
+    height: calc(100dvh - 250px);
+    min-height: 460px;
+    max-height: 1100px;
+  }
+
+  .hud-score { font-size: 32px; }
+  .hud-stage { font-size: 13px; }
+
+  .enzyme-btn {
+    padding: 20px 8px;
+    border-radius: 18px;
+  }
+  .enzyme-btn::before { border-radius: 18px; }
+  .enzyme-name { font-size: 16px; }
+  .key-hint { width: 26px; height: 26px; font-size: 13px; }
+
+  .food-name { font-size: 14px; }
+  .food-item { width: 76px; height: 76px; font-size: 44px; }
+  .hit-zone { width: 96px; height: 96px; }
+
+  .organ-label { font-size: 20px; padding: 6px 14px; }
+  .organ-tag { font-size: 22px; padding: 5px 16px; }
+  .organ-tag.minor { font-size: 16px; }
 }
 
 /* Scrollbar */

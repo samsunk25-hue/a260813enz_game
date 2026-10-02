@@ -11,7 +11,7 @@ const PROFANITY_LIST = [
   '씨발년', '개새기', '시방새', '미친', '좆밥', '염병', 'fuck', 'shit', 'bitch', 'asshole'
 ];
 
-export const filterProfanity = (text) => {
+const filterProfanity = (text) => {
   let filtered = text;
   PROFANITY_LIST.forEach(word => {
     const regex = new RegExp(word, 'gi');
@@ -334,7 +334,7 @@ const createFoodInstance = (currentStage) => {
 // ============================================================
 
 // 🫀 소화기관 배경 SVG (입 28%, 위 53%, 소장 78% 정밀 정렬)
-const DigestiveOrganBG = React.memo(({ hideLabels, activeOrgan }) => (
+const DigestiveOrganBG = React.memo(({ activeOrgan }) => (
   <svg viewBox="0 0 200 400" className="absolute inset-0 w-full h-full opacity-35" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
     <defs>
       <linearGradient id="esophagusGrad" x1="0" y1="0" x2="0" y2="1">
@@ -352,47 +352,54 @@ const DigestiveOrganBG = React.memo(({ hideLabels, activeOrgan }) => (
     <g className={activeOrgan === 'mouth' ? 'animate-organ-highlight' : ''}>
       <ellipse cx="100" cy="112" rx="36" ry="18" fill="#f87171" opacity="0.25" />
       <ellipse cx="100" cy="112" rx="36" ry="18" fill="none" stroke="#f87171" strokeWidth="2.5" opacity="0.6" />
-      {!hideLabels && (
-        <text x="146" y="116" fill="#f87171" fontSize="13" fontWeight="800" opacity="0.85">입</text>
-      )}
     </g>
     
     {/* 🫗 2. 위 (y: 53% -> SVG y: 212) */}
     <g className={activeOrgan === 'stomach' ? 'animate-organ-highlight' : ''}>
       <path d="M70,195 C52,195 48,228 66,242 C84,256 122,256 132,242 C144,228 136,195 118,195 Z" fill="#fbbf24" opacity="0.2" />
       <path d="M70,195 C52,195 48,228 66,242 C84,256 122,256 132,242 C144,228 136,195 118,195 Z" fill="none" stroke="#fbbf24" strokeWidth="2.5" opacity="0.6" />
-      {!hideLabels && (
-        <text x="146" y="217" fill="#fbbf24" fontSize="13" fontWeight="800" opacity="0.85">위</text>
-      )}
     </g>
 
     {/* 🧪 간 & 쓸개 (위와 작은창자 사이) */}
     <g opacity="0.35">
       <ellipse cx="55" cy="272" rx="22" ry="14" fill="#f97316" opacity="0.3" />
       <ellipse cx="55" cy="272" rx="22" ry="14" fill="none" stroke="#f97316" strokeWidth="1.5" opacity="0.6" />
-      {!hideLabels && (
-        <text x="24" y="266" fill="#f97316" fontSize="10" fontWeight="700" opacity="0.7">쓸개</text>
-      )}
     </g>
     
     {/* 🧬 3. 작은창자 (y: 78% -> SVG y: 312) */}
     <g className={activeOrgan === 'intestine' ? 'animate-organ-highlight' : ''}>
       <path d="M75,295 Q125,302 110,318 Q90,332 115,338 Q135,344 115,358" fill="none" stroke="#34d399" strokeWidth="14" strokeLinecap="round" opacity="0.3" />
       <path d="M75,295 Q125,302 110,318 Q90,332 115,338 Q135,344 115,358" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
-      {!hideLabels && (
-        <text x="140" y="318" fill="#34d399" fontSize="12" fontWeight="800" opacity="0.85">작은창자</text>
-      )}
     </g>
     
     {/* 🪱 대장 */}
     <g opacity="0.25">
       <path d="M60,375 Q40,390 80,395 Q120,400 100,408" fill="none" stroke="#94a3b8" strokeWidth="12" strokeLinecap="round" opacity="0.3" />
-      {!hideLabels && (
-        <text x="32" y="392" fill="#94a3b8" fontSize="10" fontWeight="600" opacity="0.6">대장</text>
-      )}
     </g>
   </svg>
 ));
+
+// 🏷️ 소화기관 이름표 (배경색이 있는 큰 글씨로 가시성 확보)
+const ORGAN_LABELS = [
+  { id: 'mouth',     label: '입',       color: '#f87171', x: 73, y: 28 },
+  { id: 'stomach',   label: '위',       color: '#fbbf24', x: 73, y: 53 },
+  { id: 'gallbladder', label: '쓸개',   color: '#fb923c', x: 12, y: 66, minor: true },
+  { id: 'intestine', label: '작은창자', color: '#34d399', x: 70, y: 78 },
+  { id: 'colon',     label: '대장',     color: '#94a3b8', x: 16, y: 95, minor: true },
+];
+
+const OrganLabels = React.memo(({ hideLabels, activeOrgan }) => {
+  if (hideLabels) return null;
+  return ORGAN_LABELS.map(o => (
+    <div
+      key={o.id}
+      className={`organ-tag ${o.minor ? 'minor' : ''} ${activeOrgan === o.id ? 'active' : ''}`}
+      style={{ left: `${o.x}%`, top: `${o.y}%`, background: o.color, '--tag-color': o.color }}
+    >
+      {o.label}
+    </div>
+  ));
+});
 
 // 🎯 타겟 판정선 (히트존)
 const HitZone = React.memo(({ organ, y, isActive, hideLabels }) => {
@@ -405,11 +412,11 @@ const HitZone = React.memo(({ organ, y, isActive, hideLabels }) => {
     >
       <div className="hit-zone-inner" />
       {!hideLabels ? (
-        <div className="organ-label" style={{ color: zone.color, borderColor: `${zone.color}44` }}>
+        <div className="organ-label" style={{ background: zone.color, borderColor: 'rgba(255,255,255,0.6)' }}>
           {zone.emoji} {zone.label}
         </div>
       ) : (
-        <div className="organ-label" style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)' }}>
+        <div className="organ-label" style={{ background: '#f59e0b', borderColor: 'rgba(255,255,255,0.6)' }}>
           ❓
         </div>
       )}
@@ -517,21 +524,25 @@ const NextPreview = ({ item }) => {
 // ============================================================
 
 // 🏁 시작 화면 (별명 입력칸 1개 & 사전학습 & 이어하기)
-const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickname, savedProgress }) => {
+const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickname, savedProgress, leaderboard }) => {
   const hasNickname = nickname.trim().length > 0;
   return (
     <div className="animate-slide-up" style={{
       position: 'absolute', inset: 0, zIndex: 60,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      overflowY: 'auto',
       background: 'radial-gradient(ellipse at center, rgba(18,24,41,0.96) 0%, rgba(10,14,26,0.98) 100%)',
-      padding: 24, textAlign: 'center',
+    }}>
+    <div style={{
+      minHeight: '100%',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '20px 24px', textAlign: 'center',
     }}>
       {/* 로고 & 타이틀 */}
       <div className="animate-float" style={{ marginBottom: 6, width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <img 
-          src="./og-image.jpg" 
-          alt="소화 콤보 비트 배너" 
-          style={{ width: '100%', maxWidth: 260, borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.6)', border: '2px solid rgba(255,255,255,0.1)' }} 
+        <img
+          src="./og-image.jpg"
+          alt="소화 콤보 비트 배너"
+          style={{ width: '100%', maxWidth: 220, borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.6)', border: '2px solid rgba(255,255,255,0.1)' }}
         />
       </div>
       <h1 className="gradient-text" style={{ fontSize: 30, fontWeight: 900, marginBottom: 4, marginTop: 8, lineHeight: 1.2 }}>
@@ -629,18 +640,41 @@ const StartScreen = ({ onStart, onResume, onGuide, onRanking, nickname, setNickn
         >
           📖 사전 학습 (소화 가이드)
         </button>
-        <button
-          onClick={onRanking}
-          style={{
-            padding: '9px 20px', borderRadius: 14,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: '#94a3b8', fontWeight: 700, fontSize: 12,
-          }}
-        >
-          🏆 명예의 전당 (랭킹)
-        </button>
       </div>
+
+      {/* 🏆 명예의 전당 미리보기 (TOP 3) */}
+      <div
+        onClick={onRanking}
+        className="glass-card"
+        style={{
+          width: '100%', maxWidth: 280, marginTop: 14, padding: '10px 12px',
+          border: '1px solid rgba(250,204,21,0.35)', cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 900, color: '#facc15' }}>🏆 명예의 전당</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>전체 보기 →</span>
+        </div>
+        {leaderboard.length === 0 ? (
+          <div style={{ fontSize: 12, color: '#64748b', padding: '4px 0' }}>아직 등록된 기록이 없습니다. 첫 번째 주인공이 되어 보세요!</div>
+        ) : (
+          leaderboard.slice(0, 3).map((item, idx) => (
+            <div key={idx} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '4px 2px', fontSize: 13, fontWeight: 800,
+              borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            }}>
+              <span style={{ color: idx === 0 ? '#facc15' : idx === 1 ? '#cbd5e1' : '#c2855a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {['🥇', '🥈', '🥉'][idx]} {item.nickname}
+              </span>
+              <span style={{ color: 'white', fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: 8 }}>
+                {item.score?.toLocaleString()}점 <span style={{ fontSize: 10, color: '#94a3b8' }}>(S{item.stage})</span>
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
     </div>
   );
 };
@@ -940,6 +974,40 @@ const EndScreen = ({ type, score, stage, onSave, onRanking, onRestart, onRestart
   </div>
 );
 
+// ⏸️ 일시정지 화면
+const PauseScreen = ({ onResume, onHome }) => (
+  <div className="animate-pop-in" style={{
+    position: 'absolute', inset: 0, zIndex: 60,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    background: 'rgba(10,14,26,0.82)', backdropFilter: 'blur(6px)',
+    padding: 24, textAlign: 'center',
+  }}>
+    <span style={{ fontSize: 48 }}>⏸️</span>
+    <h2 style={{ fontSize: 26, fontWeight: 900, color: '#e2e8f0', marginTop: 8, marginBottom: 4 }}>일시정지</h2>
+    <p style={{ fontSize: 13, color: '#94a3b8', marginBottom: 22 }}>
+      잠시 쉬어가요! 준비되면 계속하기를 누르세요.<br />
+      <span style={{ fontSize: 11 }}>(키보드 P 또는 Esc)</span>
+    </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 260 }}>
+      <button onClick={onResume} className="btn-shimmer" style={{
+        padding: '14px 20px', borderRadius: 14,
+        background: 'linear-gradient(135deg, #10b981, #059669)',
+        color: 'white', fontWeight: 800, fontSize: 16,
+        boxShadow: '0 4px 20px rgba(16,185,129,0.35)',
+      }}>
+        ▶ 계속하기
+      </button>
+      <button onClick={onHome} style={{
+        padding: '11px 20px', borderRadius: 12,
+        background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
+        color: '#94a3b8', fontWeight: 700, fontSize: 13,
+      }}>
+        🏠 메인으로 나가기
+      </button>
+    </div>
+  </div>
+);
+
 // 🏆 랭킹 화면
 const RankingScreen = ({ leaderboard, onClose }) => (
   <div className="animate-slide-up" style={{
@@ -1021,6 +1089,11 @@ export default function App() {
   const [fiberCount, setFiberCount] = useState(0);
   const [medicineCount, setMedicineCount] = useState(0);
   const [isFiberActive, setIsFiberActive] = useState(false);
+
+  // 1만 점 돌파 축하 표시
+  const [milestone, setMilestone] = useState(null);
+  const prevScoreRef = useRef(0);
+  const milestoneTimerRef = useRef(null);
 
   // --- Audio Handlers ---
   const initAudio = useCallback(() => {
@@ -1399,7 +1472,7 @@ export default function App() {
   }, [combo, queueNextItem, updateLoop]);
 
   // --- Item Handlers ---
-  const useFiber = useCallback(() => {
+  const activateFiber = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
     if (stageRef.current < 4) return;
     if (fiberCount <= 0) return;
@@ -1413,7 +1486,7 @@ export default function App() {
     }, 3500);
   }, [fiberCount]);
 
-  const useMedicine = useCallback(() => {
+  const activateMedicine = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
     if (stageRef.current !== 5) return;
     if (medicineCount <= 0) return;
@@ -1454,10 +1527,61 @@ export default function App() {
     });
   }, [medicineCount, queueNextItem]);
 
+  // --- Pause / Resume ---
+  // 판정 연출(feedback) 중에는 대기 중인 타이머가 있으므로 일시정지하지 않음
+  const pauseGame = useCallback(() => {
+    if (gameStateRef.current !== 'playing' || feedbackRef.current) return;
+    cancelAnimationFrame(requestRef.current);
+    gameAudio.stopBGM();
+    setGameState('paused');
+  }, []);
+
+  const resumeFromPause = useCallback(() => {
+    if (gameStateRef.current !== 'paused') return;
+    initAudio();
+    if (!gameAudio.isMuted) gameAudio.startBGM(stageRef.current);
+    setGameState('playing');
+  }, [initAudio]);
+
+  // 탭 전환 / 앱 전환 시 자동 일시정지
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) pauseGame();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [pauseGame]);
+
+  // --- 1만 점 단위 돌파 효과음 ---
+  useEffect(() => {
+    const prev = prevScoreRef.current;
+    prevScoreRef.current = score;
+    const gained = score - prev;
+    // 이어하기로 점수가 한 번에 복원되는 경우(큰 폭 증가)는 제외
+    if (gained > 0 && gained < 5000 && Math.floor(score / 10000) > Math.floor(prev / 10000)) {
+      gameAudio.playMilestone();
+      setMilestone(Math.floor(score / 10000) * 10000);
+      clearTimeout(milestoneTimerRef.current);
+      milestoneTimerRef.current = setTimeout(() => setMilestone(null), 1800);
+    }
+  }, [score]);
+
+  useEffect(() => () => clearTimeout(milestoneTimerRef.current), []);
+
   // --- Keyboard Event Handler ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       const key = e.key.toLowerCase();
+      if (key === 'p' || key === 'escape') {
+        if (gameStateRef.current === 'playing') {
+          e.preventDefault();
+          pauseGame();
+        } else if (gameStateRef.current === 'paused') {
+          e.preventDefault();
+          resumeFromPause();
+        }
+        return;
+      }
       if (key === 'm') {
         e.preventDefault();
         toggleSound();
@@ -1465,12 +1589,12 @@ export default function App() {
       }
       if (key === 'q') {
         e.preventDefault();
-        useFiber();
+        activateFiber();
         return;
       }
       if (key === 'w') {
         e.preventDefault();
-        useMedicine();
+        activateMedicine();
         return;
       }
       if (KEYBOARD_MAP[key]) {
@@ -1480,7 +1604,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleHit, toggleSound, useFiber, useMedicine]);
+  }, [handleHit, toggleSound, activateFiber, activateMedicine, pauseGame, resumeFromPause]);
 
   // --- Score Save Handler (별명 입력창 없이 1-클릭) ---
   const handleSaveScore = useCallback(() => {
@@ -1502,6 +1626,7 @@ export default function App() {
   }, [gameState, nickname, score, health, stage, maxCombo, saveProgress, clearSavedProgress]);
 
   // --- Computed UI Helpers ---
+  const inGame = gameState === 'playing' || gameState === 'paused';
   const stageConfig = STAGE_CONFIGS[stage];
   const progressPercent = stageConfig ? (clearedCount / stageConfig.targetCount) * 100 : 0;
   const currentStep = activeItem?.steps[activeItem?.stepIndex];
@@ -1525,12 +1650,12 @@ export default function App() {
     }}>
       {/* === HUD (상단 인터페이스 & 음소거 버튼) === */}
       <div style={{
-        width: '100%', maxWidth: 560,
+        width: '100%', maxWidth: 'var(--game-max-width)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '6px 4px', marginBottom: 6,
       }}>
         {/* 하트 체력 & 사운드 토글 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 100 }}>
           <div style={{ display: 'flex', gap: 2 }}>
             {[1, 2, 3].map(i => (
               <span
@@ -1549,26 +1674,42 @@ export default function App() {
           <button
             onClick={toggleSound}
             style={{
-              padding: '2px 6px', borderRadius: 8,
+              padding: '4px 10px', borderRadius: 10,
               background: isMuted ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.1)',
               border: `1px solid ${isMuted ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.15)'}`,
-              fontSize: 12, cursor: 'pointer',
+              fontSize: 15, cursor: 'pointer',
             }}
             title={isMuted ? '음악 켜기 (M)' : '음악 끄기 (M)'}
           >
             {isMuted ? '🔇' : '🔊'}
           </button>
+          {/* ⏸️ 일시정지 버튼 */}
+          {inGame && (
+            <button
+              onClick={gameState === 'paused' ? resumeFromPause : pauseGame}
+              disabled={gameState === 'playing' && feedback !== null}
+              style={{
+                padding: '4px 10px', borderRadius: 10,
+                background: gameState === 'paused' ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.1)',
+                border: `1px solid ${gameState === 'paused' ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.15)'}`,
+                fontSize: 15, fontWeight: 800, color: '#e2e8f0', cursor: 'pointer',
+              }}
+              title={gameState === 'paused' ? '계속하기 (P)' : '일시정지 (P)'}
+            >
+              {gameState === 'paused' ? '▶' : '⏸'}
+            </button>
+          )}
         </div>
 
         {/* 점수 & 스테이지 정보 */}
         <div style={{ textAlign: 'center', flex: 1 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 800, color: '#f59e0b',
+          <div className="hud-stage" style={{
+            fontWeight: 800, color: '#f59e0b',
             letterSpacing: '0.05em', textTransform: 'uppercase',
           }}>
             {stageConfig?.name} · {stageConfig?.subtitle}
           </div>
-          <div className="score-display" style={{ fontSize: 24, color: 'white' }}>
+          <div className="score-display hud-score" style={{ color: 'white' }}>
             {score.toString().padStart(5, '0')}
           </div>
         </div>
@@ -1586,10 +1727,9 @@ export default function App() {
 
       {/* === 게임 필드 === */}
       <div
-        className={`${feedback?.type === 'miss' ? 'animate-shake' : ''} ${isFiberActive ? 'animate-fiber-glow' : ''}`}
+        className={`game-field ${feedback?.type === 'miss' ? 'animate-shake' : ''} ${isFiberActive ? 'animate-fiber-glow' : ''}`}
         style={{
-          width: '100%', maxWidth: 560,
-          height: '62vh', minHeight: 410,
+          width: '100%', maxWidth: 'var(--game-max-width)',
           background: feedback?.type === 'miss'
             ? 'linear-gradient(180deg, rgba(239,68,68,0.1) 0%, var(--bg-card) 30%)'
             : isFiberActive 
@@ -1604,19 +1744,34 @@ export default function App() {
         }}
       >
         {/* 배경 소화기관 모식도 (입 28%, 위 53%, 소장 78% 정밀 정렬) */}
-        <DigestiveOrganBG
+        <DigestiveOrganBG activeOrgan={activeOrgan} />
+        <OrganLabels
           hideLabels={stageConfig?.hideLabels}
-          activeOrgan={activeOrgan}
+          activeOrgan={inGame ? activeOrgan : null}
         />
 
+        {/* 🎊 1만 점 돌파 축하 */}
+        {milestone && (
+          <div key={milestone} className="animate-milestone" style={{
+            position: 'absolute', top: '40%', left: '50%',
+            zIndex: 55, pointerEvents: 'none', whiteSpace: 'nowrap',
+            padding: '10px 22px', borderRadius: 18,
+            background: 'linear-gradient(135deg, #facc15, #f97316)',
+            color: '#1a1a2e', fontWeight: 900, fontSize: 22,
+            boxShadow: '0 0 30px rgba(250,204,21,0.6)',
+          }}>
+            🎊 {milestone.toLocaleString()}점 돌파!
+          </div>
+        )}
+
         {/* 콤보 게이지 */}
-        {gameState === 'playing' && <ComboGauge combo={combo} />}
+        {inGame && <ComboGauge combo={combo} />}
 
         {/* NEXT 미리보기 (마지막 음식일 때는 다음 음식을 숨김) */}
-        {gameState === 'playing' && clearedCount < (stageConfig?.targetCount - 1) && <NextPreview item={nextItem} />}
+        {inGame && clearedCount < (stageConfig?.targetCount - 1) && <NextPreview item={nextItem} />}
 
         {/* 1초 대기 알림 */}
-        {gameState === 'playing' && isWaiting && (
+        {inGame && isWaiting && (
           <div style={{
             position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
             zIndex: 35, padding: '4px 14px', borderRadius: 20,
@@ -1629,7 +1784,7 @@ export default function App() {
         )}
 
         {/* 특수 안내 메시지 (지방 라이페이스 분해 등) */}
-        {gameState === 'playing' && promptMessage && (
+        {inGame && promptMessage && (
           <div style={{
             position: 'absolute', top: 44, left: '50%', transform: 'translateX(-50%)',
             zIndex: 45, padding: '5px 14px', borderRadius: 12,
@@ -1644,7 +1799,7 @@ export default function App() {
         )}
 
         {/* 현재 목표 기관 타겟 판정선 (히트존) */}
-        {gameState === 'playing' && currentStep && (
+        {inGame && currentStep && (
           <HitZone
             organ={currentStep.organ}
             y={currentStep.targetY}
@@ -1654,7 +1809,7 @@ export default function App() {
         )}
 
         {/* 떨어지는 음식 (1차 소화 후 중간산물 그림으로 변신!) */}
-        {gameState === 'playing' && activeItem && !feedback && (
+        {inGame && activeItem && !feedback && (
           <div style={{
             position: 'absolute',
             left: '50%',
@@ -1676,11 +1831,11 @@ export default function App() {
             }}>
               {activeItem.currentEmoji}
             </div>
-            <span style={{
+            <span className="food-name" style={{
               marginTop: 4, padding: '2px 8px', borderRadius: 8,
               background: activeItem.isIntermediate ? 'rgba(245,158,11,0.85)' : 'rgba(0,0,0,0.7)',
               backdropFilter: 'blur(4px)',
-              fontSize: 10, fontWeight: 800,
+              fontWeight: 800,
               color: activeItem.isIntermediate ? '#1a1a2e' : '#e2e8f0',
               whiteSpace: 'nowrap',
             }}>
@@ -1709,6 +1864,17 @@ export default function App() {
             nickname={nickname}
             setNickname={setNickname}
             savedProgress={savedProgress}
+            leaderboard={leaderboard}
+          />
+        )}
+
+        {gameState === 'paused' && (
+          <PauseScreen
+            onResume={resumeFromPause}
+            onHome={() => {
+              gameAudio.stopBGM();
+              setGameState('start');
+            }}
           />
         )}
 
@@ -1769,12 +1935,12 @@ export default function App() {
       {/* === 아이템 (태블릿/PC) 버튼 === */}
       {(stage >= 4) && (
         <div style={{
-          width: '100%', maxWidth: 560,
+          width: '100%', maxWidth: 'var(--game-max-width)',
           marginTop: 8, display: 'flex', gap: 10, justifyContent: 'center'
         }}>
           {stage >= 4 && (
             <button
-              onClick={useFiber}
+              onClick={activateFiber}
               disabled={fiberCount <= 0 || isFiberActive || gameState !== 'playing'}
               style={{
                 flex: 1, padding: '8px 12px', borderRadius: 12,
@@ -1792,7 +1958,7 @@ export default function App() {
           )}
           {stage >= 5 && (
             <button
-              onClick={useMedicine}
+              onClick={activateMedicine}
               disabled={medicineCount <= 0 || gameState !== 'playing'}
               style={{
                 flex: 1, padding: '8px 12px', borderRadius: 12,
@@ -1813,7 +1979,7 @@ export default function App() {
 
       {/* === 효소 조작 아케이드 버튼 === */}
       <div style={{
-        width: '100%', maxWidth: 560,
+        width: '100%', maxWidth: 'var(--game-max-width)',
         marginTop: 10,
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
@@ -1831,7 +1997,7 @@ export default function App() {
             }}
           >
             <span className="key-hint">{enzyme.key}</span>
-            <span style={{ display: 'block', fontSize: 11, fontWeight: 800, lineHeight: 1.2 }}>{enzyme.name}</span>
+            <span className="enzyme-name">{enzyme.name}</span>
           </button>
         ))}
       </div>
@@ -1839,7 +2005,7 @@ export default function App() {
       {/* 콤보 & 키보드 안내 바 */}
       {gameState === 'playing' && (
         <div style={{
-          width: '100%', maxWidth: 560, marginTop: 6,
+          width: '100%', maxWidth: 'var(--game-max-width)', marginTop: 6,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           padding: '0 4px',
         }}>

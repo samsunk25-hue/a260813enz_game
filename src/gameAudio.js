@@ -338,6 +338,19 @@ class GameAudio {
     this._playNote(660, 0.08, 'triangle', this.sfxGain, 0.2);
   }
 
+  // 🎊 1만 점 돌파 - 반짝이는 상승 아르페지오 + 종소리
+  playMilestone() {
+    if (!this.ctx || this.isMuted) return;
+    this.resume();
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5 E5 G5 C6 E6 G6
+    notes.forEach((freq, i) => {
+      this._playNote(freq, 0.18, 'triangle', this.sfxGain, 0.3, i * 0.06);
+    });
+    this._playNote(2093.00, 0.8, 'sine', this.sfxGain, 0.25, 0.4);
+    this._playNote(1046.50, 0.8, 'sine', this.sfxGain, 0.2, 0.4);
+    this._playNote(1567.98, 0.8, 'sine', this.sfxGain, 0.15, 0.4);
+  }
+
   // ⚡ 지방 2단계 알림
   playMultiStep() {
     if (!this.ctx || this.isMuted) return;
